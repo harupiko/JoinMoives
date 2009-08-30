@@ -13,8 +13,12 @@
   NSWindow *window;
   IBOutlet id loadingView;
   IBOutlet id spinningView;
+  IBOutlet id thumbNailView;
+  IBOutlet id thumbNailArrayController;
+  NSMutableArray *thumbNailImageArray;
 }
 @property (assign) IBOutlet NSWindow *window;
+@property (retain) NSMutableArray *thumbNailImageArray;
 
 - (QTMovie*)addMovieTo:(QTMovie*)movie fromPath:(NSString*)path;
 - (void)exportMovie:(QTMovie*)movie to:(NSString*)path;

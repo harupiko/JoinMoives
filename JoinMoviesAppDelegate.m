@@ -12,7 +12,13 @@
 
 @implementation JoinMoviesAppDelegate
 
-@synthesize window;
+@synthesize window,thumbNailImageArray;
+
+- (id)init
+{
+  thumbNailImageArray = [[NSMutableArray alloc] init];
+  return self;
+}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 }
@@ -20,6 +26,14 @@
 - (QTMovie*)addMovieTo:(QTMovie*)movie fromPath:(NSString*)path;
 {
   QTMovie *srcMovie = [QTMovie movieWithFile:path error:nil];
+  
+  NSURL *fileURL = [NSURL fileURLWithPath:path];
+  NSString *fileName = [fileURL lastPathComponent];
+  
+  [thumbNailArrayController addObject: [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   [srcMovie posterImage], @"image",
+                                   fileName,@"name",
+                                   nil]];
   [movie insertSegmentOfMovie:srcMovie timeRange:QTMakeTimeRange(QTZeroTime, [srcMovie duration]) atTime:[movie duration]];
   return movie;
 }
@@ -39,11 +53,20 @@
   [window display];
   QTMovie *exportMovie;
   BOOL    isFirst = YES;
+  
+  [thumbNailArrayController removeObjects:[thumbNailArrayController arrangedObjects]];
+  
   for( NSString *path in paths ){
+    NSURL *fileURL = [NSURL fileURLWithPath:path];
+    NSString *fileName = [fileURL lastPathComponent];
     NSLog(@"%@", path);
     if( isFirst ) {
       exportMovie = [QTMovie movieWithFile:path error:nil];
       [exportMovie setAttribute:[NSNumber numberWithBool:YES] forKey:QTMovieEditableAttribute];
+      [thumbNailArrayController addObject: [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       [exportMovie posterImage], @"image",
+                                       fileName,@"name",
+                                       nil]];
       isFirst = NO;      
     } else {
       exportMovie = [self addMovieTo:exportMovie fromPath:path];
@@ -54,6 +77,7 @@
   [self exportMovie:exportMovie to:exportPath];
   [loadingView setHidden:YES];
   [spinningView stopAnimation:self];
+  [thumbNailView setNeedsDisplay:YES];
   [window display];
   
   [[NSWorkspace sharedWorkspace] openFile:exportPath];
